@@ -25,18 +25,23 @@ namespace script_reader {
             } catch (Win32Exception e) {
                 Console.WriteLine(1);
             }*/
-            
-            if (args[0] != "init") {
-                var folderExists = false;
-                foreach (var directory in Directory.GetDirectories(Directory.GetCurrentDirectory())) {
-                    string dir = new DirectoryInfo(directory).Name;
-                    if (dir == "config") {
-                        folderExists = true;
-                    }
-                }
+            ConfigChecks(args);
+            var extract = ExtractFiles(args);
+        }
 
-                if (folderExists) {
-                    Console.WriteLine("Configuration already found. Would you like to generate new configuration (if your local config version is broken)? (y or n).");
+        private static void ConfigChecks(string[] args) {
+            string folder = "";
+            foreach (var directory in Directory.GetDirectories(Directory.GetCurrentDirectory())) {
+                string dir = new DirectoryInfo(directory).Name;
+                if (dir == "config") {
+                    folder = Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/config").FullName;
+                }
+            }
+
+            if (args[0] == "init") {
+                if (folder != "") {
+                    Console.WriteLine(
+                        "Configuration already found. Would you like to generate new configuration (if your local config version is broken)? (y or n).");
                     if (Console.ReadLine()?.ToLower() == "y") {
                         Initialize init = new Initialize();
                     }
@@ -44,7 +49,30 @@ namespace script_reader {
                     Console.WriteLine("No existing configuration found. Creating configuration...");
                     Initialize init = new Initialize();
                 }
+            } else {
+                if (folder == "") {
+                    Console.WriteLine(
+                        "No existing configuration found. Would you like to run the automated setup? (y or n).");
+                    string confirmation = Console.ReadLine()?.ToLower();
+                    Console.WriteLine("This can be run later manually by providing the 'init' argument.");
+                    if (confirmation == "y") {
+                        Initialize init = new Initialize();
+                    } else {
+                        Console.WriteLine("Okay. Exiting the program.");
+                        Environment.Exit(0);
+                    }
+                }
             }
+        }
+
+        private static Extract ExtractFiles(string[] args) {
+            if (args[0].EndsWith(".rpa")) {
+                Console.WriteLine("Configuration found. RPA file found. Extracting...");
+                return new Extract(args[0]);
+            }
+            Console.WriteLine("ERROR: Incorrect file type supplied. Make sure the file is an .rpa file.");
+            Environment.Exit(13);
+            return null;
         }
     }
 }
