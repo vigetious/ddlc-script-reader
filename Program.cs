@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -8,25 +9,9 @@ using System.Net;
 namespace script_reader {
     class Program {
         static void Main(string[] args) {
-            /*try {
-                var proc = new Process() {
-                    StartInfo = new ProcessStartInfo {
-                        FileName = "pythonn",
-                        Arguments = "awd",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    }
-                };
-                proc.Start();
-                string output = proc.StandardOutput.ReadToEnd();
-                proc.WaitForExit();
-                Console.WriteLine(proc.ExitCode);
-            } catch (Win32Exception e) {
-                Console.WriteLine(1);
-            }*/
             ConfigChecks(args);
             var extract = ExtractFiles(args);
+            ReadFiles readFiles = new ReadFiles(extract.rpyFiles);
         }
 
         private static void ConfigChecks(string[] args) {
@@ -66,12 +51,26 @@ namespace script_reader {
         }
 
         private static Extract ExtractFiles(string[] args) {
-            if (args[0].EndsWith(".rpa")) {
-                Console.WriteLine("Configuration found. RPA file found. Extracting...");
-                return new Extract(args[0]);
+            FileInfo[] rpaFolder;
+            try {
+                rpaFolder = new DirectoryInfo(args[0]).GetFiles("*.rpa", SearchOption.AllDirectories);
+            } catch (IOException) {
+                throw new SystemException("You must enter a directory.");
             }
-            Console.WriteLine("ERROR: Incorrect file type supplied. Make sure the file is an .rpa file.");
-            Environment.Exit(13);
+
+            foreach (var file in rpaFolder) {
+                if (file.FullName.EndsWith(".rpa")) {
+                    Console.WriteLine("Configuration found. RPA file found. Extracting...");
+                    return new Extract(rpaFolder);
+                }
+
+                Console.WriteLine("ERROR: No .rpa files found in directory.");
+                Environment.Exit(13);
+                return null;
+            }
+
+            Console.WriteLine("No files found in directory.");
+            Environment.Exit(1);
             return null;
         }
     }
