@@ -16,15 +16,17 @@ namespace script_reader {
 
             Console.WriteLine("Reading the script from each file...");
             FileInfo fi = new FileInfo("script");
-            
-            CheckBackups(fi);
-            
+
+            if (fi.Exists) {
+                CheckBackups(fi);
+            }
+
             for (int i = 0; i < files.Length; i++) {
                 using (StreamReader sr = files[i].OpenText()) {
-                    //int numberOfWords = ScriptBuilder<int>(sr, characters);
+                    int numberOfWords = ScriptBuilder<int>(sr, characters);
                     using (StreamWriter sw = fi.AppendText()) {
-                        foreach (var VARIABLE in ScriptBuilder<List<string>>(sr, characters)) {
-                            sw.WriteLine(VARIABLE);
+                        foreach (var line in ScriptBuilder<List<string>>(sr, characters)) {
+                            sw.WriteLine(line);
                         }
                     }
                 }
@@ -65,6 +67,8 @@ namespace script_reader {
                             script.Add(s.Trim());
                         }
                     } else if (s.Trim().EndsWith('"') && characters.Contains(potentialCharacter)) {
+                        numberOfWords += s.Trim().Split(" ").Length;
+                        script.Add(s.Trim());
                     }
                 }
             }
@@ -81,22 +85,22 @@ namespace script_reader {
         }
 
         private static void CheckBackups(FileInfo fi) {
-            if (fi.Exists) {
-                if (Directory.Exists(fi.DirectoryName + "/scriptBackups")) {
-                    var backupFiles = new DirectoryInfo(fi.DirectoryName + "/scriptBackups").EnumerateFiles();
-                    List<int> backupFileNumbers = new List<int>();
-                    foreach (var file in backupFiles) {
-                        if (file.Name.EndsWith(")")) {
-                            backupFileNumbers.Add(int.Parse(file.Name[^2].ToString()));
-                        }
+            if (Directory.Exists(fi.DirectoryName + "/scriptBackups") && Directory.EnumerateFiles(fi.DirectoryName + "/scriptBackups").Count() != 0) {
+                var backupFiles = new DirectoryInfo(fi.DirectoryName + "/scriptBackups").EnumerateFiles();
+                List<int> backupFileNumbers = new List<int>();
+                foreach (var file in backupFiles) {
+                    if (file.Name.EndsWith(")")) {
+                        backupFileNumbers.Add(int.Parse(file.Name[^2].ToString()));
                     }
-                    fi.CopyTo($"{fi.DirectoryName}/scriptBackups/{fi.Name}({backupFileNumbers.Max() + 1})");
-                } else {
-                    fi.CopyTo(
-                        $"{Directory.CreateDirectory(fi.DirectoryName + "/scriptBackups").FullName}/{fi.Name}(1)");
                 }
-                fi.Delete();
+
+                fi.CopyTo($"{fi.DirectoryName}/scriptBackups/{fi.Name}({backupFileNumbers.Max() + 1})");
+            } else {
+                fi.CopyTo(
+                    $"{Directory.CreateDirectory(fi.DirectoryName + "/scriptBackups").FullName}/{fi.Name}(1)");
             }
+
+            fi.Delete();
         }
     }
 }
