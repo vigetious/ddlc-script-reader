@@ -21,9 +21,10 @@ namespace script_reader {
                 CheckBackups(fi);
             }
 
+            int totalNumberOfWords = 0;
             for (int i = 0; i < files.Length; i++) {
                 using (StreamReader sr = files[i].OpenText()) {
-                    int numberOfWords = ScriptBuilder<int>(sr, characters);
+                    totalNumberOfWords += ScriptBuilder<int>(sr, characters);
                     using (StreamWriter sw = fi.AppendText()) {
                         foreach (var line in ScriptBuilder<List<string>>(sr, characters)) {
                             sw.WriteLine(line);
@@ -31,6 +32,7 @@ namespace script_reader {
                     }
                 }
             }
+            Console.WriteLine(totalNumberOfWords);
         }
 
         private static List<string> getCharacters(FileInfo definitions) {
@@ -67,8 +69,8 @@ namespace script_reader {
                             script.Add(s.Trim());
                         }
                     } else if (s.Trim().EndsWith('"') && characters.Contains(potentialCharacter)) {
-                        numberOfWords += s.Trim().Split(" ").Length;
-                        script.Add(s.Trim());
+                        numberOfWords += s.Trim().Split('"')[1].Split(" ").Length;
+                        script.Add(s.Trim().Split('"')[1]);
                     }
                 }
             }
@@ -90,7 +92,8 @@ namespace script_reader {
                 List<int> backupFileNumbers = new List<int>();
                 foreach (var file in backupFiles) {
                     if (file.Name.EndsWith(")")) {
-                        backupFileNumbers.Add(int.Parse(file.Name[^2].ToString()));
+                        int start = file.Name.IndexOf("(") + 1;
+                        backupFileNumbers.Add(int.Parse(file.Name.Substring(start, file.Name.IndexOf(")") - start)));
                     }
                 }
 
