@@ -12,6 +12,7 @@ namespace script_reader {
             ConfigChecks(args);
             var extract = ExtractFiles(args);
             ReadFiles readFiles = new ReadFiles(extract.rpyFiles);
+            CleanUp();
         }
 
         private static void ConfigChecks(string[] args) {
@@ -72,6 +73,11 @@ namespace script_reader {
             Console.WriteLine("No files found in directory.");
             Environment.Exit(1);
             return null;
+        }
+
+        private static void CleanUp() {
+            Console.WriteLine("Cleaning up...");
+            Directory.Delete(Directory.GetCurrentDirectory() + "/temp", true);
         }
     }
 }

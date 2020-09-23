@@ -21,18 +21,10 @@ namespace script_reader {
                 CheckBackups(fi);
             }
 
-            int totalNumberOfWords = 0;
-            for (int i = 0; i < files.Length; i++) {
-                using (StreamReader sr = files[i].OpenText()) {
-                    totalNumberOfWords += ScriptBuilder<int>(sr, characters);
-                    using (StreamWriter sw = fi.AppendText()) {
-                        foreach (var line in ScriptBuilder<List<string>>(sr, characters)) {
-                            sw.WriteLine(line);
-                        }
-                    }
-                }
-            }
-            Console.WriteLine(totalNumberOfWords);
+            ScriptBuilder scriptBuilder = new ScriptBuilder(files, characters, fi);
+            Console.WriteLine(scriptBuilder.totalNumberOfWords);
+            int hoursToRead = (scriptBuilder.totalNumberOfWords / 250) / 60;
+            Console.WriteLine($"Time to read: {hoursToRead}h");
         }
 
         private static List<string> getCharacters(FileInfo definitions) {
@@ -49,41 +41,6 @@ namespace script_reader {
 
             Console.WriteLine("Retrieved character names.");
             return characters;
-        }
-
-        private static dynamic ScriptBuilder<T>(StreamReader sr, List<string> characters) {
-            List<string> script = new List<string>();
-            int numberOfWords = 0;
-            var s = "";
-            while ((s = sr.ReadLine()) != null) {
-                string potentialCharacter = null;
-                try {
-                    potentialCharacter = s.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries)[0];
-                } catch (IndexOutOfRangeException) {
-                }
-
-                if (!string.IsNullOrEmpty(potentialCharacter)) {
-                    if (s.Trim().StartsWith('"') && s.Trim().EndsWith('"')) {
-                        if (s.Trim().Contains(' ')) {
-                            numberOfWords += s.Trim().Split(" ").Length;
-                            script.Add(s.Trim());
-                        }
-                    } else if (s.Trim().EndsWith('"') && characters.Contains(potentialCharacter)) {
-                        numberOfWords += s.Trim().Split('"')[1].Split(" ").Length;
-                        script.Add(s.Trim().Split('"')[1]);
-                    }
-                }
-            }
-
-            if (typeof(T) == typeof(int)) {
-                return numberOfWords;
-            }
-
-            if (typeof(T) == typeof(List<string>)) {
-                return script;
-            }
-
-            return null;
         }
 
         private static void CheckBackups(FileInfo fi) {
