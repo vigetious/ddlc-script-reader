@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net;
 
 namespace script_reader {
     class Program {
         static void Main(string[] args) {
-            ConfigChecks(args);
+            var arguments = ParseCommandArguments(args);
+            ConfigChecks(arguments.Item2.Contains("init"));
             var extract = ExtractFiles(args);
             ReadFiles readFiles = new ReadFiles(extract.rpyFiles);
+            int hoursToRead = (readFiles.ScriptBuilder.totalNumberOfWords / 250) / 60;
+            Console.WriteLine($"Total number of words: {readFiles.ScriptBuilder.totalNumberOfWords}");
+            Console.WriteLine($"Time to read: {hoursToRead}h");
             CleanUp();
         }
 
-        private static void ConfigChecks(string[] args) {
+        private static void ConfigChecks(bool config) {
             string folder = "";
             foreach (var directory in Directory.GetDirectories(Directory.GetCurrentDirectory())) {
                 string dir = new DirectoryInfo(directory).Name;
@@ -24,7 +24,7 @@ namespace script_reader {
                 }
             }
 
-            if (args[0] == "init") {
+            if (config) {
                 if (folder != "") {
                     Console.WriteLine(
                         "Configuration already found. Would you like to generate new configuration (if your local config version is broken)? (y or n).");
@@ -56,7 +56,7 @@ namespace script_reader {
             try {
                 rpaFolder = new DirectoryInfo(args[0]).GetFiles("*.rpa", SearchOption.AllDirectories);
             } catch (IOException) {
-                throw new SystemException("You must enter a directory.");
+                throw new SystemException("Incorrect directory given.");
             }
 
             foreach (var file in rpaFolder) {
@@ -78,6 +78,23 @@ namespace script_reader {
         private static void CleanUp() {
             Console.WriteLine("Cleaning up...");
             Directory.Delete(Directory.GetCurrentDirectory() + "/temp", true);
+        }
+
+        private static Tuple<Dictionary<string, string>, List<string>> ParseCommandArguments(string[] args) {
+            Dictionary<string, string> namedArguments = new Dictionary<string, string>();
+            List<string> arguments = new List<string>();
+            string prefix = "-";
+            if (args.Length != 0) {
+                for (var x = 0; x < args.Length; x++) {
+                    if (args[x].StartsWith(prefix)) {
+                        namedArguments.Add(args[x], args[x + 1]);
+                        x++;
+                    } else {
+                        arguments.Add(args[x]);
+                    }
+                }
+            }
+            return new Tuple<Dictionary<string, string>, List<string>>(namedArguments, arguments);
         }
     }
 }
