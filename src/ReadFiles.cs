@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace script_reader {
     public class ReadFiles {
+        public ScriptBuilder ScriptBuilder { get; set; }
         public ReadFiles(FileInfo[] files) {
             List<string> characters = new List<string>();
             for (int i = 0; i < files.Length; i++) {
@@ -21,10 +22,7 @@ namespace script_reader {
                 CheckBackups(fi);
             }
 
-            ScriptBuilder scriptBuilder = new ScriptBuilder(files, characters, fi);
-            Console.WriteLine(scriptBuilder.totalNumberOfWords);
-            int hoursToRead = (scriptBuilder.totalNumberOfWords / 250) / 60;
-            Console.WriteLine($"Time to read: {hoursToRead}h");
+            ScriptBuilder = new ScriptBuilder(files, characters, fi);
         }
 
         private static List<string> getCharacters(FileInfo definitions) {

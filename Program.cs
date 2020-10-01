@@ -6,10 +6,14 @@ namespace script_reader {
     class Program {
         static void Main(string[] args) {
             var arguments = ParseCommandArguments(args);
+            int wpm = 250;
+            if (arguments.Item1.ContainsKey("-wpm")) {
+                wpm = int.Parse(arguments.Item1["-wpm"]);
+            }
             ConfigChecks(arguments.Item2.Contains("init"));
-            var extract = ExtractFiles(args);
+            var extract = ExtractFiles(arguments.Item1.ContainsKey("-dir") ? arguments.Item1["-dir"] : args[0]);
             ReadFiles readFiles = new ReadFiles(extract.rpyFiles);
-            int hoursToRead = (readFiles.ScriptBuilder.totalNumberOfWords / 250) / 60;
+            int hoursToRead = (readFiles.ScriptBuilder.totalNumberOfWords / wpm) / 60;
             Console.WriteLine($"Total number of words: {readFiles.ScriptBuilder.totalNumberOfWords}");
             Console.WriteLine($"Time to read: {hoursToRead}h");
             CleanUp();
@@ -29,11 +33,13 @@ namespace script_reader {
                     Console.WriteLine(
                         "Configuration already found. Would you like to generate new configuration (if your local config version is broken)? (y or n).");
                     if (Console.ReadLine()?.ToLower() == "y") {
-                        Initialize init = new Initialize();
+                        new Initialize();
+                        Environment.Exit(0);
                     }
                 } else {
                     Console.WriteLine("No existing configuration found. Creating configuration...");
-                    Initialize init = new Initialize();
+                    new Initialize();
+                    Environment.Exit(0);
                 }
             } else {
                 if (folder == "") {
@@ -42,7 +48,8 @@ namespace script_reader {
                     string confirmation = Console.ReadLine()?.ToLower();
                     Console.WriteLine("This can be run later manually by providing the 'init' argument.");
                     if (confirmation == "y") {
-                        Initialize init = new Initialize();
+                        new Initialize();
+                        Environment.Exit(0);
                     } else {
                         Console.WriteLine("Okay. Exiting the program.");
                         Environment.Exit(0);
@@ -51,12 +58,12 @@ namespace script_reader {
             }
         }
 
-        private static Extract ExtractFiles(string[] args) {
+        private static Extract ExtractFiles(string directory) {
             FileInfo[] rpaFolder;
             try {
-                rpaFolder = new DirectoryInfo(args[0]).GetFiles("*.rpa", SearchOption.AllDirectories);
+                rpaFolder = new DirectoryInfo(directory).GetFiles("*.rpa", SearchOption.AllDirectories);
             } catch (IOException) {
-                throw new SystemException("Incorrect directory given.");
+                throw new SystemException("Incorrect or no directory given.");
             }
 
             foreach (var file in rpaFolder) {

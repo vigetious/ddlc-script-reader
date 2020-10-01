@@ -14,8 +14,6 @@ namespace script_reader {
             foreach (var rpaFile in folder) {
                 ExtractRpa(rpaFile.FullName, "temp");
             }
-            //ExtractRpa(folder, "temp");
-            // in case there are any folders in the rpa file.
             FileInfo[] rpaFiles = tempExtractionFolder.GetFiles("*.rpa", SearchOption.AllDirectories);
             Console.WriteLine("Extracted root .rpa. Checking for other .rpa files contained in the root file...");
             for (int i = 0; i < rpaFiles.Length; i++) {
