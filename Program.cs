@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
+using static script_reader.Command;
 
 namespace script_reader {
     class Program {
@@ -9,6 +11,15 @@ namespace script_reader {
             int wpm = 250;
             if (arguments.Item1.ContainsKey("-wpm")) {
                 wpm = int.Parse(arguments.Item1["-wpm"]);
+            }
+
+            if (arguments.Item1.ContainsKey("-rm")) {
+                if (arguments.Item2.Contains("hard")) {
+                    //Console.WriteLine("hard");
+                    ForcedCleanUp(true);
+                } else {
+                    ForcedCleanUp(false);
+                }
             }
             ConfigChecks(arguments.Item2.Contains("init"));
             var extract = ExtractFiles(arguments.Item1.ContainsKey("-dir") ? arguments.Item1["-dir"] : args[0]);
@@ -87,6 +98,31 @@ namespace script_reader {
             Directory.Delete(Directory.GetCurrentDirectory() + "/temp", true);
         }
 
+        private static void ForcedCleanUp(bool hard) {
+            if (hard) {
+                Console.WriteLine("Are you sure you want to hard remove all files/folders created by this program? (y or n).");
+            } else {
+                Console.WriteLine("Are you sure you want to soft remove all files/folders created by this program? (y or n).");
+            }
+            
+            string confirmation = Console.ReadLine()?.ToLower();
+            if (confirmation == "y") {
+                Console.WriteLine("Understood, removing all files/folders...");
+                if (Directory.Exists(Directory.GetCurrentDirectory() + "/temp")) {
+                    Directory.Delete(Directory.GetCurrentDirectory() + "/temp", true);
+                } else if (Directory.Exists(Directory.GetCurrentDirectory() + "/config")) {
+                    Directory.Delete(Directory.GetCurrentDirectory() + "/config", true);
+                }
+                if (hard) {
+                    if (Directory.Exists(Directory.GetCurrentDirectory() + "/scriptBackups")) {
+                        Directory.Delete(Directory.GetCurrentDirectory() + "/scriptBackups", true);
+                    }
+                }
+            }
+            Console.WriteLine("Done.");
+            Environment.Exit(0);
+        }
+
         private static Tuple<Dictionary<string, string>, List<string>> ParseCommandArguments(string[] args) {
             Dictionary<string, string> namedArguments = new Dictionary<string, string>();
             List<string> arguments = new List<string>();
@@ -95,7 +131,6 @@ namespace script_reader {
                 for (var x = 0; x < args.Length; x++) {
                     if (args[x].StartsWith(prefix)) {
                         namedArguments.Add(args[x], args[x + 1]);
-                        x++;
                     } else {
                         arguments.Add(args[x]);
                     }
