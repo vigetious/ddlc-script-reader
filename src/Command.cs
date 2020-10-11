@@ -19,7 +19,7 @@ namespace script_reader {
                 string output = proc.StandardOutput.ReadToEnd();
                 proc.WaitForExit();
                 return output;
-            } catch (Win32Exception e) {
+            } catch (Win32Exception) {
                 Console.WriteLine("Fatal error: Process could not be run. File name or arguments incorrect.");
                 return "err";
             }
