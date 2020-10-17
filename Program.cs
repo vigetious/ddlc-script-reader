@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
-using static script_reader.Command;
 
 namespace script_reader {
     class Program {
@@ -21,6 +19,7 @@ namespace script_reader {
                     ForcedCleanUp(false);
                 }
             }
+
             ConfigChecks(arguments.Item2.Contains("init"));
             var extract = ExtractFiles(arguments.Item1.ContainsKey("-dir") ? arguments.Item1["-dir"] : args[0]);
             ReadFiles readFiles = new ReadFiles(extract.rpyFiles);
@@ -100,11 +99,13 @@ namespace script_reader {
 
         private static void ForcedCleanUp(bool hard) {
             if (hard) {
-                Console.WriteLine("Are you sure you want to hard remove all files/folders created by this program? (y or n).");
+                Console.WriteLine(
+                    "Are you sure you want to hard remove all files/folders created by this program? (y or n).");
             } else {
-                Console.WriteLine("Are you sure you want to soft remove all files/folders created by this program? (y or n).");
+                Console.WriteLine(
+                    "Are you sure you want to soft remove all files/folders created by this program? (y or n).");
             }
-            
+
             string confirmation = Console.ReadLine()?.ToLower();
             if (confirmation == "y") {
                 Console.WriteLine("Understood, removing all files/folders...");
@@ -113,12 +114,14 @@ namespace script_reader {
                 } else if (Directory.Exists(Directory.GetCurrentDirectory() + "/config")) {
                     Directory.Delete(Directory.GetCurrentDirectory() + "/config", true);
                 }
+
                 if (hard) {
                     if (Directory.Exists(Directory.GetCurrentDirectory() + "/scriptBackups")) {
                         Directory.Delete(Directory.GetCurrentDirectory() + "/scriptBackups", true);
                     }
                 }
             }
+
             Console.WriteLine("Done.");
             Environment.Exit(0);
         }
@@ -136,6 +139,7 @@ namespace script_reader {
                     }
                 }
             }
+
             return new Tuple<Dictionary<string, string>, List<string>>(namedArguments, arguments);
         }
     }

@@ -3,12 +3,10 @@ using System.IO;
 using System.Runtime.InteropServices;
 using LibGit2Sharp;
 using static script_reader.Command;
+using static script_reader.Config;
 
 namespace script_reader {
     public class Initialize {
-        private string ConfigDirectory { get; set; }
-        public string python2Location { get; set; }
-        private string python3Location { get; set; }
 
         public Initialize() {
             Console.WriteLine("Generating new configuration...");
@@ -17,14 +15,14 @@ namespace script_reader {
             while (true) {
                 if (Console.ReadLine()?.ToLower() == "y") {
                     Tuple<string, string> pythonPaths = GenerateConfig();
-                    python2Location = pythonPaths.Item1;
-                    python3Location = pythonPaths.Item2;
+                    AddOrUpdateAppSetting("script-reader:python3Location", pythonPaths.Item1.Trim());
+                    AddOrUpdateAppSetting("script-reader:python2Location", pythonPaths.Item2.Trim());
                     break;
                 }
                 Console.WriteLine("Incorrect input. Try again.");
             }
         }
-
+        
         static Tuple<string, string> GenerateConfig() {
             string python2Location = "";
             string python3Location = "";
@@ -34,12 +32,15 @@ namespace script_reader {
                 // os is unix based
                 if (UnixCommand("python2", "-c \"import sys; print(sys.version_info.major)\"").StartsWith("2")) {
                     Console.WriteLine("Python 2 is installed. Checking if Python 3 is also installed...");
+                    python2Location = UnixCommand("python2", "-c \"import sys; print(sys.executable)\"");
+
                 } else {
                     python2Location = PythonManualPathEntry(2);
                 }
 
                 if (UnixCommand("python3", "-V") != "err") {
                     Console.WriteLine("Python 3 is installed. Creating virtual environment...");
+                    python3Location = UnixCommand("python3", "-c \"import sys; print(sys.executable)\"");
                 } else {
                     python3Location = PythonManualPathEntry(3);
                 }
