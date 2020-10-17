@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using LibGit2Sharp;
 using static script_reader.Command;
 using static script_reader.Config;
@@ -15,8 +16,8 @@ namespace script_reader {
             while (true) {
                 if (Console.ReadLine()?.ToLower() == "y") {
                     Tuple<string, string> pythonPaths = GenerateConfig();
-                    AddOrUpdateAppSetting("script-reader:python3Location", pythonPaths.Item1.Trim());
-                    AddOrUpdateAppSetting("script-reader:python2Location", pythonPaths.Item2.Trim());
+                    AddOrUpdateAppSetting("script-reader:python3Location", pythonPaths.Item1);
+                    AddOrUpdateAppSetting("script-reader:python2Location", pythonPaths.Item2);
                     break;
                 }
                 Console.WriteLine("Incorrect input. Try again.");
@@ -32,27 +33,29 @@ namespace script_reader {
                 // os is unix based
                 if (UnixCommand("python2", "-c \"import sys; print(sys.version_info.major)\"").StartsWith("2")) {
                     Console.WriteLine("Python 2 is installed. Checking if Python 3 is also installed...");
-                    python2Location = UnixCommand("python2", "-c \"import sys; print(sys.executable)\"");
+                    python2Location = UnixCommand("python2", "-c \"import sys; print(sys.executable)\"").Trim();
 
                 } else {
-                    python2Location = PythonManualPathEntry(2);
+                    python2Location = PythonManualPathEntry(2).Trim();
                 }
 
                 if (UnixCommand("python3", "-V") != "err") {
                     Console.WriteLine("Python 3 is installed. Creating virtual environment...");
-                    python3Location = UnixCommand("python3", "-c \"import sys; print(sys.executable)\"");
+                    python3Location = UnixCommand("python3", "-c \"import sys; print(sys.executable)\"").Trim();
                 } else {
-                    python3Location = PythonManualPathEntry(3);
+                    python3Location = PythonManualPathEntry(3).Trim();
                 }
 
-                UnixCommand("python3", "-m venv config/venv");
+                UnixCommand(python3Location, "-m venv config/venv");
                 Console.WriteLine("Virtual environment created. Installing/downloading dependencies...");
                 UnixCommand($"{configDirectory}/venv/bin/python", "-m pip install unrpa");
                 Console.WriteLine("Installed unrpa.");
                 try {
-                    Repository.Clone("https://github.com/CensoredUsername/unrpyc.git",
-                        $"{configDirectory}/unrpyc");
-                } catch (NameConflictException) {
+                    Task.Run(() => {
+                        Repository.Clone("https://github.com/CensoredUsername/unrpyc.git",
+                            $"{configDirectory}/unrpyc", new CloneOptions {OnTransferProgress = ReportProgress});
+                    }).Wait();
+                } catch (AggregateException) {
                     Console.WriteLine("unrpyc already exists.");
                 }
 
@@ -60,37 +63,37 @@ namespace script_reader {
                 Console.WriteLine("Dependencies installed/downloaded.");
                 Console.WriteLine("Initialization finished. Now re-run the program with an RPA file.");
             } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-                //WindowsGetPythonEnvironments(UnixCommand(@"C:\Windows\System32\cmd.exe", "/c py --list-paths"));
-                Console.WriteLine(UnixCommand(@"C:\Windows\System32\cmd.exe",
-                    "/c py -2 -c \"import sys; print(sys.version_info.major)\""));
                 if (UnixCommand(@"C:\Windows\System32\cmd.exe",
                     "/c py -2 -c \"import sys; print(sys.version_info.major)\"").StartsWith("2")) {
                     python2Location = UnixCommand(@"C:\Windows\System32\cmd.exe",
-                        "/c py -2 -c \"import sys; print(sys.executable)\"");
+                        "/c py -2 -c \"import sys; print(sys.executable)\"").Trim();
                     Console.WriteLine("Python 2 is installed. Checking if Python 3 is also installed...");
                 } else {
-                    python2Location = PythonManualPathEntry(2);
+                    python2Location = PythonManualPathEntry(2).Trim();
                 }
 
                 if (UnixCommand(@"C:\Windows\System32\cmd.exe",
                     "/c py -3 -c \"import sys; print(sys.version_info.major)\"").StartsWith("3")) {
                     python3Location = UnixCommand(@"C:\Windows\System32\cmd.exe",
-                        "/c py -3 -c \"import sys; print(sys.executable)\"");
+                        "/c py -3 -c \"import sys; print(sys.executable)\"").Trim();
                     Console.WriteLine("Python 3 is installed. Creating virtual environment...");
                 } else {
-                    python3Location = PythonManualPathEntry(3);
+                    python3Location = PythonManualPathEntry(3).Trim();
                 }
 
                 UnixCommand(@"C:\Windows\System32\cmd.exe",
-                    "/c py -3 -m venv config/venv");
+                    $"/c \"{python3Location}\" -m venv config/venv");
                 Console.WriteLine("Virtual environment created. Installing/downloading dependencies...");
                 UnixCommand(@"C:\Windows\System32\cmd.exe",
                     $"/c {configDirectory}/venv/bin/python -m pip install unrpa");
                 Console.WriteLine("Installed unrpa.");
+                Console.WriteLine("Downloading unrpyc...");
                 try {
-                    Repository.Clone("https://github.com/CensoredUsername/unrpyc.git",
-                        $"{configDirectory}/unrpyc");
-                } catch (NameConflictException) {
+                    Task.Run(() => {
+                        Repository.Clone("https://github.com/CensoredUsername/unrpyc.git",
+                            $"{configDirectory}/unrpyc", new CloneOptions {OnTransferProgress = ReportProgress});
+                    }).Wait();
+                } catch (AggregateException) {
                     Console.WriteLine("unrpyc already exists.");
                 }
 
@@ -135,6 +138,12 @@ namespace script_reader {
             }
 
             return path;
+        }
+        
+        private static bool ReportProgress(TransferProgress progress) {
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.WriteLine($"Download {progress.ReceivedObjects} of {progress.TotalObjects} objects, Bytes: {progress.ReceivedBytes}");
+            return true;
         }
     }
 }
