@@ -8,7 +8,6 @@ using static script_reader.Config;
 
 namespace script_reader {
     public class Initialize {
-
         public Initialize() {
             Console.WriteLine("Generating new configuration...");
             Console.WriteLine(
@@ -16,14 +15,15 @@ namespace script_reader {
             while (true) {
                 if (Console.ReadLine()?.ToLower() == "y") {
                     Tuple<string, string> pythonPaths = GenerateConfig();
-                    AddOrUpdateAppSetting("script-reader:python3Location", pythonPaths.Item1);
-                    AddOrUpdateAppSetting("script-reader:python2Location", pythonPaths.Item2);
+                    AddOrUpdateAppSetting("script-reader:python2Location", pythonPaths.Item1);
+                    AddOrUpdateAppSetting("script-reader:python3Location", pythonPaths.Item2);
                     break;
                 }
+
                 Console.WriteLine("Incorrect input. Try again.");
             }
         }
-        
+
         static Tuple<string, string> GenerateConfig() {
             string python2Location = "";
             string python3Location = "";
@@ -31,24 +31,26 @@ namespace script_reader {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
                 RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD)) {
                 // os is unix based
-                if (UnixCommand("python2", "-c \"import sys; print(sys.version_info.major)\"").StartsWith("2")) {
+                if (UnixCommand("python2", "-c \"import sys; print(sys.version_info.major)\"", true).StartsWith("2")) {
                     Console.WriteLine("Python 2 is installed. Checking if Python 3 is also installed...");
-                    python2Location = UnixCommand("python2", "-c \"import sys; print(sys.executable)\"").Trim();
-
+                    python2Location = UnixCommand("python2", "-c \"import sys; print(sys.executable)\"", true).Trim();
                 } else {
                     python2Location = PythonManualPathEntry(2).Trim();
                 }
 
-                if (UnixCommand("python3", "-V") != "err") {
+                if (UnixCommand("python3", "-V", true) != "err") {
                     Console.WriteLine("Python 3 is installed. Creating virtual environment...");
-                    python3Location = UnixCommand("python3", "-c \"import sys; print(sys.executable)\"").Trim();
+                    python3Location = UnixCommand("python3", "-c \"import sys; print(sys.executable)\"", true).Trim();
                 } else {
                     python3Location = PythonManualPathEntry(3).Trim();
                 }
 
-                UnixCommand(python3Location, "-m venv config/venv");
+                UnixCommand(python3Location, "-m venv config/venv", true);
                 Console.WriteLine("Virtual environment created. Installing/downloading dependencies...");
-                UnixCommand($"{configDirectory}/venv/bin/python", "-m pip install unrpa");
+                AddOrUpdateAppSetting("script-reader:python3VenvLocation", UnixCommand($"{configDirectory}/venv/bin/python",
+                    "-c \"import sys; print(sys.executable)\"", true).Trim());
+                UnixCommand($"{configDirectory}/venv/bin/python", "-m pip install unrpa", true);
+
                 Console.WriteLine("Installed unrpa.");
                 try {
                     Task.Run(() => {
@@ -64,28 +66,30 @@ namespace script_reader {
                 Console.WriteLine("Initialization finished. Now re-run the program with an RPA file.");
             } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                 if (UnixCommand(@"C:\Windows\System32\cmd.exe",
-                    "/c py -2 -c \"import sys; print(sys.version_info.major)\"").StartsWith("2")) {
+                    "/c py -2 -c \"import sys; print(sys.version_info.major)\"", true).StartsWith("2")) {
                     python2Location = UnixCommand(@"C:\Windows\System32\cmd.exe",
-                        "/c py -2 -c \"import sys; print(sys.executable)\"").Trim();
+                        "/c py -2 -c \"import sys; print(sys.executable)\"", true).Trim();
                     Console.WriteLine("Python 2 is installed. Checking if Python 3 is also installed...");
                 } else {
                     python2Location = PythonManualPathEntry(2).Trim();
                 }
 
                 if (UnixCommand(@"C:\Windows\System32\cmd.exe",
-                    "/c py -3 -c \"import sys; print(sys.version_info.major)\"").StartsWith("3")) {
+                    "/c py -3 -c \"import sys; print(sys.version_info.major)\"", true).StartsWith("3")) {
                     python3Location = UnixCommand(@"C:\Windows\System32\cmd.exe",
-                        "/c py -3 -c \"import sys; print(sys.executable)\"").Trim();
+                        "/c py -3 -c \"import sys; print(sys.executable)\"", true).Trim();
                     Console.WriteLine("Python 3 is installed. Creating virtual environment...");
                 } else {
                     python3Location = PythonManualPathEntry(3).Trim();
                 }
 
                 UnixCommand(@"C:\Windows\System32\cmd.exe",
-                    $"/c \"{python3Location}\" -m venv config/venv");
+                    $"/c \"{python3Location}\" -m venv config/venv", true);
                 Console.WriteLine("Virtual environment created. Installing/downloading dependencies...");
+                AddOrUpdateAppSetting("script-reader:python3VenvLocation", UnixCommand(@"C:\Windows\System32\cmd.exe",
+                    $"/c {configDirectory}/venv/Scripts/python -c \"import sys; print(sys.executable)\"", true).Trim());
                 UnixCommand(@"C:\Windows\System32\cmd.exe",
-                    $"/c {configDirectory}/venv/bin/python -m pip install unrpa");
+                    $"/c {configDirectory}/venv/Scripts/python -m pip install unrpa", true);
                 Console.WriteLine("Installed unrpa.");
                 Console.WriteLine("Downloading unrpyc...");
                 try {
@@ -122,7 +126,7 @@ namespace script_reader {
             string path;
             while (true) {
                 path = Console.ReadLine();
-                string response = UnixCommand(path, "-c \"import sys; print(sys.version_info.major)\"");
+                string response = UnixCommand(path, "-c \"import sys; print(sys.version_info.major)\"", true);
                 if (response == "err") {
                     Console.WriteLine("Try again.");
                 }
@@ -139,10 +143,11 @@ namespace script_reader {
 
             return path;
         }
-        
+
         private static bool ReportProgress(TransferProgress progress) {
             Console.SetCursorPosition(0, Console.CursorTop - 1);
-            Console.WriteLine($"Download {progress.ReceivedObjects} of {progress.TotalObjects} objects, Bytes: {progress.ReceivedBytes}");
+            Console.WriteLine(
+                $"Download {progress.ReceivedObjects} of {progress.TotalObjects} objects, Bytes: {progress.ReceivedBytes}");
             return true;
         }
     }

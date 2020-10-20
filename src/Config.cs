@@ -27,9 +27,16 @@ namespace script_reader {
         }
 
         public static dynamic GetAppSetting(string path) {
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "config/appsettings.json"))
-                .Build();
+            dynamic configuration = null;
+            try {
+                configuration = new ConfigurationBuilder()
+                    .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "config/appsettings.json"))
+                    .Build();
+            } catch (FileNotFoundException) {
+                Console.WriteLine("ERROR: Configuration file not found. Did you run \"script-reader init\"?");
+                Environment.Exit(1);
+            }
+
             return configuration[path];
         }
 

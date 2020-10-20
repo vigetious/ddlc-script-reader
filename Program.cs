@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using static script_reader.Command;
 
 namespace script_reader {
     class Program {
@@ -26,7 +27,9 @@ namespace script_reader {
             int hoursToRead = (readFiles.ScriptBuilder.totalNumberOfWords / wpm) / 60;
             Console.WriteLine($"Total number of words: {readFiles.ScriptBuilder.totalNumberOfWords}");
             Console.WriteLine($"Time to read: {hoursToRead}h");
-            CleanUp();
+            if (!arguments.Item1.ContainsKey("-keep")) {
+                CleanUp();
+            }
         }
 
         private static void ConfigChecks(bool config) {
@@ -94,7 +97,7 @@ namespace script_reader {
 
         private static void CleanUp() {
             Console.WriteLine("Cleaning up...");
-            Directory.Delete(Directory.GetCurrentDirectory() + "/temp", true);
+            Directory.Delete(Directory.GetCurrentDirectory() + "/extracted", true);
         }
 
         private static void ForcedCleanUp(bool hard) {
@@ -109,8 +112,8 @@ namespace script_reader {
             string confirmation = Console.ReadLine()?.ToLower();
             if (confirmation == "y") {
                 Console.WriteLine("Understood, removing all files/folders...");
-                if (Directory.Exists(Directory.GetCurrentDirectory() + "/temp")) {
-                    Directory.Delete(Directory.GetCurrentDirectory() + "/temp", true);
+                if (Directory.Exists(Directory.GetCurrentDirectory() + "/extracted")) {
+                    Directory.Delete(Directory.GetCurrentDirectory() + "/extracted", true);
                 } else if (Directory.Exists(Directory.GetCurrentDirectory() + "/config")) {
                     Directory.Delete(Directory.GetCurrentDirectory() + "/config", true);
                 }

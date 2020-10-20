@@ -17,6 +17,7 @@ Most users will not need to change the configuration of the
 
 ``-rm hard`` - remove all files/folders created by this program, including script backups. Should only be used as a last resort if the above command does not fix the error.
 
+``-keep`` - keep extracted RPA files, instead of auto-deleting them after the operation runs. The files are kept in the created "extracted" directory.
 
 ### Example Usage
 
