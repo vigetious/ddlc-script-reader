@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using static script_reader.Command;
+using Newtonsoft.Json;
 
 namespace script_reader {
     class Program {
@@ -23,11 +23,18 @@ namespace script_reader {
 
             ConfigChecks(arguments.Item2.Contains("init"));
             var extract = ExtractFiles(arguments.Item1.ContainsKey("-dir") ? arguments.Item1["-dir"] : args[0]);
-            ReadFiles readFiles = new ReadFiles(extract.rpyFiles);
-            int hoursToRead = (readFiles.ScriptBuilder.totalNumberOfWords / wpm) / 60;
-            Console.WriteLine($"Total number of words: {readFiles.ScriptBuilder.totalNumberOfWords}");
-            Console.WriteLine($"Time to read: {hoursToRead}h");
-            if (!arguments.Item1.ContainsKey("-keep")) {
+            ReadFiles readFiles = new ReadFiles(extract.rpyFiles, arguments.Item2);
+            int minutesToRead = readFiles.ScriptBuilder.totalNumberOfWords / wpm;
+            if (arguments.Item2.Contains("-json")) {
+                Console.WriteLine(JsonifyOutput(readFiles.ScriptBuilder, minutesToRead));
+            } else {
+                Console.WriteLine($"Total number of words: {readFiles.ScriptBuilder.totalNumberOfWords}");
+                Console.WriteLine($"Time to read: {minutesToRead / 60}h {minutesToRead % 60}m");
+                if (!arguments.Item2.Contains("-keepRPA")) {
+                    Console.WriteLine("Cleaning up...");
+                }
+            }
+            if (!arguments.Item2.Contains("-keepRPA")) {
                 CleanUp();
             }
         }
@@ -96,7 +103,6 @@ namespace script_reader {
         }
 
         private static void CleanUp() {
-            Console.WriteLine("Cleaning up...");
             Directory.Delete(Directory.GetCurrentDirectory() + "/extracted", true);
         }
 
@@ -135,7 +141,7 @@ namespace script_reader {
             string prefix = "-";
             if (args.Length != 0) {
                 for (var x = 0; x < args.Length; x++) {
-                    if (args[x].StartsWith(prefix)) {
+                    if (args[x].StartsWith(prefix) && args.Length > x + 1 && !args[x + 1].StartsWith("-")) {
                         namedArguments.Add(args[x], args[x + 1]);
                     } else {
                         arguments.Add(args[x]);
@@ -144,6 +150,16 @@ namespace script_reader {
             }
 
             return new Tuple<Dictionary<string, string>, List<string>>(namedArguments, arguments);
+        }
+
+        private static string JsonifyOutput(ScriptBuilder output, int minutesToRead) {
+            Console.Clear();
+            Parent parent = new Parent();
+            parent.TotalWords = output.totalNumberOfWords;
+            parent.Time = new Time();
+            parent.Time.Hours = minutesToRead / 60;
+            parent.Time.Minutes = minutesToRead % 60;
+            return JsonConvert.SerializeObject(parent);
         }
     }
 }

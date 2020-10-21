@@ -6,7 +6,7 @@ using System.Linq;
 namespace script_reader {
     public class ReadFiles {
         public ScriptBuilder ScriptBuilder { get; set; }
-        public ReadFiles(FileInfo[] files) {
+        public ReadFiles(FileInfo[] files, List<string> commands) {
             List<string> characters = new List<string>();
             for (int i = 0; i < files.Length; i++) {
                 if (files[i].Name == "definitions.rpy") {
@@ -22,7 +22,7 @@ namespace script_reader {
                 CheckBackups(fi);
             }
 
-            ScriptBuilder = new ScriptBuilder(files, characters, fi);
+            ScriptBuilder = new ScriptBuilder(files, characters, fi, commands);
         }
 
         private static List<string> getCharacters(FileInfo definitions) {

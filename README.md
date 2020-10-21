@@ -17,7 +17,11 @@ Most users will not need to change the configuration of the
 
 ``-rm hard`` - remove all files/folders created by this program, including script backups. Should only be used as a last resort if the above command does not fix the error.
 
-``-keep`` - keep extracted RPA files, instead of auto-deleting them after the operation runs. The files are kept in the created "extracted" directory.
+``-keepRPA`` - keep extracted RPA files, instead of auto-deleting them after the operation runs. The files are kept in the created "extracted" directory.
+
+``-keepScript`` - keep extracted script, instead of auto-deleting them after the operation runs. The files are kept int he created "backup" directory.
+
+``-json`` - output in JSON format. Useful if tunneling output into another program.
 
 ### Example Usage
 

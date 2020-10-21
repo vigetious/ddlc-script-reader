@@ -14,7 +14,6 @@ namespace script_reader {
                     exe = @"C:\Windows\System32\cmd.exe";
                 }
             }
-            Console.WriteLine($"exe: {exe}, args: {args}");
             try {
                 var proc = new Process {
                     StartInfo = new ProcessStartInfo {
@@ -22,15 +21,12 @@ namespace script_reader {
                         Arguments = args,
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
-                        RedirectStandardError = true,
                         CreateNoWindow = true
                     }
                 };
                 proc.Start();
                 string output = proc.StandardOutput.ReadToEnd();
-                string error = proc.StandardError.ReadToEnd();
                 proc.WaitForExit();
-                Console.WriteLine(error);
                 return output;
             } catch (Win32Exception e) {
                 Console.WriteLine("An error occured: " + e);

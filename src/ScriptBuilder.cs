@@ -7,7 +7,7 @@ namespace script_reader {
         public int totalNumberOfWords { get; set; }
         public List<string> script { get; set; }
 
-        public ScriptBuilder(FileInfo[] files, List<string> characters, FileInfo fi) {
+        public ScriptBuilder(FileInfo[] files, List<string> characters, FileInfo fi, List<string> commands) {
             script = new List<string>();
             for (int i = 0; i < files.Length; i++) {
                 using (StreamReader sr = files[i].OpenText()) {
@@ -19,7 +19,10 @@ namespace script_reader {
             }
 
             totalNumberOfWords = BuildTotalNumberOfWords(script);
-            BackupScript(script, fi);
+            if (commands.Contains("-keepScript")) {
+                Console.WriteLine("Writing backup file...");
+                BackupScript(script, fi);
+            }
         }
         
         private static List<string> BuildScript(StreamReader sr, List<string> characters) {
