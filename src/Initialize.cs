@@ -58,6 +58,7 @@ namespace script_reader {
                             $"{configDirectory}/unrpyc", new CloneOptions {OnTransferProgress = ReportProgress});
                     }).Wait();
                 } catch (AggregateException) {
+                    ManualInstallCheck($"{configDirectory}/unrpyc");
                     Console.WriteLine("unrpyc already exists.");
                 }
 
@@ -98,9 +99,9 @@ namespace script_reader {
                             $"{configDirectory}/unrpyc", new CloneOptions {OnTransferProgress = ReportProgress});
                     }).Wait();
                 } catch (AggregateException) {
+                    ManualInstallCheck($"{configDirectory}/unrpyc");
                     Console.WriteLine("unrpyc already exists.");
                 }
-
                 Console.WriteLine("Downloaded unrpyc.");
                 Console.WriteLine("Dependencies installed/downloaded.");
                 Console.WriteLine("Initialization finished. Now re-run the program with an RPA file.");
@@ -149,6 +150,13 @@ namespace script_reader {
             Console.WriteLine(
                 $"Download {progress.ReceivedObjects} of {progress.TotalObjects} objects, Bytes: {progress.ReceivedBytes}");
             return true;
+        }
+
+        private static void ManualInstallCheck(string directory) {
+            if (!Directory.Exists(directory)) {
+                Console.WriteLine("Cannot download unrpyc. Please make sure you are connected to the internet.");
+                Environment.Exit(1);
+            }
         }
     }
 }

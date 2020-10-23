@@ -40,8 +40,10 @@ namespace script_reader {
             if (!arguments.Item2.Contains("-keepRPA")) {
                 CleanUp();
             }
-            
-            Directory.Delete(Directory.GetCurrentDirectory() + "/zippedFolder", true);
+
+            if (Directory.Exists(Directory.GetCurrentDirectory() + "/zippedFolder")) {
+                Directory.Delete(Directory.GetCurrentDirectory() + "/zippedFolder", true);
+            }
         }
 
         private static void ConfigChecks(bool config) {
@@ -148,13 +150,17 @@ namespace script_reader {
                 Console.WriteLine("Understood, removing all files/folders...");
                 if (Directory.Exists(Directory.GetCurrentDirectory() + "/extracted")) {
                     Directory.Delete(Directory.GetCurrentDirectory() + "/extracted", true);
-                } else if (Directory.Exists(Directory.GetCurrentDirectory() + "/config")) {
+                } 
+                if (Directory.Exists(Directory.GetCurrentDirectory() + "/config")) {
                     Directory.Delete(Directory.GetCurrentDirectory() + "/config", true);
                 }
 
                 if (hard) {
                     if (Directory.Exists(Directory.GetCurrentDirectory() + "/scriptBackups")) {
                         Directory.Delete(Directory.GetCurrentDirectory() + "/scriptBackups", true);
+                    }
+                    if (File.Exists(Directory.GetCurrentDirectory() + "/script")) {
+                        File.Delete(Directory.GetCurrentDirectory() + "/script");
                     }
                 }
             }
