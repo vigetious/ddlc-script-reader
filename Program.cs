@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using SharpCompress.Common;
+using SharpCompress.Readers;
 
 namespace script_reader {
     class Program {
         static void Main(string[] args) {
             var arguments = ParseCommandArguments(args);
+            Console.WriteLine(args[0]);
             int wpm = 250;
             if (arguments.Item1.ContainsKey("-wpm")) {
                 wpm = int.Parse(arguments.Item1["-wpm"]);
@@ -37,6 +40,8 @@ namespace script_reader {
             if (!arguments.Item2.Contains("-keepRPA")) {
                 CleanUp();
             }
+            
+            Directory.Delete(Directory.GetCurrentDirectory() + "/zippedFolder", true);
         }
 
         private static void ConfigChecks(bool config) {
@@ -80,6 +85,29 @@ namespace script_reader {
 
         private static Extract ExtractFiles(string directory) {
             FileInfo[] rpaFolder;
+            FileAttributes attr = File.GetAttributes(directory);
+            if ((attr & FileAttributes.Directory) != FileAttributes.Directory) {
+                try {
+                    using (Stream stream = File.OpenRead(directory))
+                    using (var reader = ReaderFactory.Open(stream)) {
+                        while (reader.MoveToNextEntry()) {
+                            if (!reader.Entry.IsDirectory) {
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Extracted " + reader.Entry.Key);
+                                reader.WriteEntryToDirectory(Directory.GetCurrentDirectory() + "/zippedFolder",
+                                    new ExtractionOptions {
+                                        ExtractFullPath = true,
+                                        Overwrite = true
+                                    });
+                                directory = Directory.GetCurrentDirectory() + "/zippedFolder";
+                            }
+                        }
+                    }
+                } catch (InvalidOperationException) {
+                    Console.WriteLine("File is not a supported compressed file type. Currently supported file types: Zip, GZip, BZip2, Tar, Rar, LZip, XZ.");
+                    Environment.Exit(1);
+                }
+            }
             try {
                 rpaFolder = new DirectoryInfo(directory).GetFiles("*.rpa", SearchOption.AllDirectories);
             } catch (IOException) {
