@@ -4,12 +4,12 @@ using System.IO;
 using Newtonsoft.Json;
 using SharpCompress.Common;
 using SharpCompress.Readers;
+using static script_reader.Extract;
 
 namespace script_reader {
     class Program {
         static void Main(string[] args) {
             var arguments = ParseCommandArguments(args);
-            Console.WriteLine(args[0]);
             int wpm = 250;
             if (arguments.Item1.ContainsKey("-wpm")) {
                 wpm = int.Parse(arguments.Item1["-wpm"]);
@@ -17,7 +17,6 @@ namespace script_reader {
 
             if (arguments.Item1.ContainsKey("-rm")) {
                 if (arguments.Item2.Contains("hard")) {
-                    //Console.WriteLine("hard");
                     ForcedCleanUp(true);
                 } else {
                     ForcedCleanUp(false);
@@ -89,7 +88,9 @@ namespace script_reader {
             FileInfo[] rpaFolder;
             FileAttributes attr = File.GetAttributes(directory);
             if ((attr & FileAttributes.Directory) != FileAttributes.Directory) {
-                try {
+                ExtractCompressedFile(directory, Directory.GetCurrentDirectory() + "/zippedFolder");
+                directory = Directory.GetCurrentDirectory() + "/zippedFolder";
+                /*try {
                     using (Stream stream = File.OpenRead(directory))
                     using (var reader = ReaderFactory.Open(stream)) {
                         while (reader.MoveToNextEntry()) {
@@ -108,7 +109,7 @@ namespace script_reader {
                 } catch (InvalidOperationException) {
                     Console.WriteLine("File is not a supported compressed file type. Currently supported file types: Zip, GZip, BZip2, Tar, Rar, LZip, XZ.");
                     Environment.Exit(1);
-                }
+                }*/
             }
             try {
                 rpaFolder = new DirectoryInfo(directory).GetFiles("*.rpa", SearchOption.AllDirectories);
@@ -153,6 +154,9 @@ namespace script_reader {
                 } 
                 if (Directory.Exists(Directory.GetCurrentDirectory() + "/config")) {
                     Directory.Delete(Directory.GetCurrentDirectory() + "/config", true);
+                }
+                if (Directory.Exists(Directory.GetCurrentDirectory() + "/zippedFolder")) {
+                    Directory.Delete(Directory.GetCurrentDirectory() + "/zippedFolder", true);
                 }
 
                 if (hard) {

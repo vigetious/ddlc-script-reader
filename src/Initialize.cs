@@ -1,10 +1,14 @@
 using System;
 using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using LibGit2Sharp;
 using static script_reader.Command;
 using static script_reader.Config;
+using static script_reader.Extract;
 
 namespace script_reader {
     public class Initialize {
@@ -52,16 +56,19 @@ namespace script_reader {
                 UnixCommand($"{configDirectory}/venv/bin/python", "-m pip install unrpa", true);
 
                 Console.WriteLine("Installed unrpa.");
-                try {
+                /*try {
                     Task.Run(() => {
                         Repository.Clone("https://github.com/CensoredUsername/unrpyc.git",
                             $"{configDirectory}/unrpyc", new CloneOptions {OnTransferProgress = ReportProgress});
                     }).Wait();
-                } catch (AggregateException) {
+                } catch (AggregateException e) {
+                    Console.WriteLine(e);
                     ManualInstallCheck($"{configDirectory}/unrpyc");
                     Console.WriteLine("unrpyc already exists.");
+                }*/
+                if (!Directory.Exists($"{configDirectory}/unrpyc")) {
+                    DownloadWithProgressBar("https://github.com/vigetious/unrpyc/archive/master.zip", $"{configDirectory}/unrpyc", "unrpyc");
                 }
-
                 Console.WriteLine("Downloaded unrpyc.");
                 Console.WriteLine("Dependencies installed/downloaded.");
                 Console.WriteLine("Initialization finished. Now re-run the program with an RPA file.");
@@ -93,15 +100,15 @@ namespace script_reader {
                     $"/c {configDirectory}/venv/Scripts/python -m pip install unrpa", true);
                 Console.WriteLine("Installed unrpa.");
                 Console.WriteLine("Downloading unrpyc...");
-                try {
+                /*try {
                     Task.Run(() => {
                         Repository.Clone("https://github.com/CensoredUsername/unrpyc.git",
                             $"{configDirectory}/unrpyc", new CloneOptions {OnTransferProgress = ReportProgress});
                     }).Wait();
-                } catch (AggregateException) {
+                } catch (AggregateException e) {
                     ManualInstallCheck($"{configDirectory}/unrpyc");
                     Console.WriteLine("unrpyc already exists.");
-                }
+                }*/
                 Console.WriteLine("Downloaded unrpyc.");
                 Console.WriteLine("Dependencies installed/downloaded.");
                 Console.WriteLine("Initialization finished. Now re-run the program with an RPA file.");
@@ -145,18 +152,21 @@ namespace script_reader {
             return path;
         }
 
-        private static bool ReportProgress(TransferProgress progress) {
-            Console.SetCursorPosition(0, Console.CursorTop - 1);
-            Console.WriteLine(
-                $"Download {progress.ReceivedObjects} of {progress.TotalObjects} objects, Bytes: {progress.ReceivedBytes}");
-            return true;
-        }
-
-        private static void ManualInstallCheck(string directory) {
-            if (!Directory.Exists(directory)) {
-                Console.WriteLine("Cannot download unrpyc. Please make sure you are connected to the internet.");
-                Environment.Exit(1);
+        private static void DownloadWithProgressBar(string repo, string destination, string name = null) {
+            Console.WriteLine(name != null ? $"Downloading {name}..." : "Downloading file...");
+            if (NetworkInterface.GetIsNetworkAvailable()) {
+                HttpClient client = new HttpClient();
+                var contentBytes = client.GetByteArrayAsync(new Uri(repo)).Result;
+                MemoryStream stream = new MemoryStream(contentBytes);
+                FileStream file = new FileStream($"{destination}Zip", FileMode.Create, FileAccess.Write);
+                stream.WriteTo(file);
+                file.Close();
+                stream.Close();
+            } else {
+                Console.WriteLine("Not connected to the internet. Please reconnect and then re-run 'init'.");
+                Environment.Exit(0);
             }
+            ExtractCompressedFile($"{destination}Zip", destination);
         }
     }
 }

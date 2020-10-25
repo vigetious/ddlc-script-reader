@@ -7,7 +7,7 @@ namespace script_reader {
     static class Config {
         public static void AddOrUpdateAppSetting<T>(string sectionPathKey, T value) {
             try {
-                var filePath = Path.Combine(AppContext.BaseDirectory, "config/appsettings.json");
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "config/appsettings.json");
                 if (!File.Exists(filePath)) {
                     using StreamWriter sw = File.AppendText(filePath);
                     sw.Write("{}");
