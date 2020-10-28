@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 
-namespace script_reader {
+namespace renpy_tools {
     static class Config {
         public static void AddOrUpdateAppSetting<T>(string sectionPathKey, T value) {
             try {
@@ -30,10 +30,10 @@ namespace script_reader {
             dynamic configuration = null;
             try {
                 configuration = new ConfigurationBuilder()
-                    .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "config/appsettings.json"))
+                    .AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "config/appsettings.json"))
                     .Build();
             } catch (FileNotFoundException) {
-                Console.WriteLine("ERROR: Configuration file not found. Did you run \"script-reader init\"?");
+                Console.WriteLine("ERROR: Configuration file not found. Did you run \"renpy-tools init\"?");
                 Environment.Exit(1);
             }
 

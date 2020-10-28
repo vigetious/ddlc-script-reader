@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace script_reader {
+namespace renpy_tools {
     public class ReadFiles {
         public ScriptBuilder ScriptBuilder { get; set; }
         public ReadFiles(FileInfo[] files, List<string> commands) {

@@ -2,10 +2,10 @@ using System;
 using System.IO;
 using SharpCompress.Common;
 using SharpCompress.Readers;
-using static script_reader.Command;
+using static renpy_tools.Command;
 
 
-namespace script_reader {
+namespace renpy_tools {
     public class Extract {
         static string config = Directory.GetCurrentDirectory() + "/config";
         public FileInfo[] rpyFiles { get; set; }
@@ -26,7 +26,7 @@ namespace script_reader {
             }
 
             Console.WriteLine("Extracted all sub .rpa files. Decompiling .rpyc files...");
-            UnixCommand("python2", $"config/unrpyc/unrpyc.py ./extracted/");
+            UnixCommand("python2", $"config/unrpyc/unrpyc-master/unrpyc.py ./extracted/");
             foreach (var rpycFile in tempExtractionFolder.GetFiles("*.rpyc", SearchOption.AllDirectories)) {
                 rpycFile.Delete();
             }
@@ -40,7 +40,7 @@ namespace script_reader {
         }
 
         static void ExtractRpyc() {
-            UnixCommand("python2", $"config/unrpyc/unrpyc.py ./extracted/");
+            UnixCommand("python2", $"config/unrpyc/unrpyc-master/unrpyc.py ./extracted/");
         }
 
         public static void ExtractCompressedFile(string file, string extractedDirectory) {

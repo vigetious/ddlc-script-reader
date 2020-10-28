@@ -1,16 +1,13 @@
 using System;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using LibGit2Sharp;
-using static script_reader.Command;
-using static script_reader.Config;
-using static script_reader.Extract;
+using static renpy_tools.Command;
+using static renpy_tools.Config;
+using static renpy_tools.Extract;
 
-namespace script_reader {
+namespace renpy_tools {
     public class Initialize {
         public Initialize() {
             Console.WriteLine("Generating new configuration...");
@@ -19,8 +16,8 @@ namespace script_reader {
             while (true) {
                 if (Console.ReadLine()?.ToLower() == "y") {
                     Tuple<string, string> pythonPaths = GenerateConfig();
-                    AddOrUpdateAppSetting("script-reader:python2Location", pythonPaths.Item1);
-                    AddOrUpdateAppSetting("script-reader:python3Location", pythonPaths.Item2);
+                    AddOrUpdateAppSetting("renpy-tools:python2Location", pythonPaths.Item1);
+                    AddOrUpdateAppSetting("renpy-tools:python3Location", pythonPaths.Item2);
                     break;
                 }
 
@@ -51,7 +48,7 @@ namespace script_reader {
 
                 UnixCommand(python3Location, "-m venv config/venv", true);
                 Console.WriteLine("Virtual environment created. Installing/downloading dependencies...");
-                AddOrUpdateAppSetting("script-reader:python3VenvLocation", UnixCommand($"{configDirectory}/venv/bin/python",
+                AddOrUpdateAppSetting("renpy-tools:python3VenvLocation", UnixCommand($"{configDirectory}/venv/bin/python",
                     "-c \"import sys; print(sys.executable)\"", true).Trim());
                 UnixCommand($"{configDirectory}/venv/bin/python", "-m pip install unrpa", true);
 
@@ -67,7 +64,7 @@ namespace script_reader {
                     Console.WriteLine("unrpyc already exists.");
                 }*/
                 if (!Directory.Exists($"{configDirectory}/unrpyc")) {
-                    DownloadWithProgressBar("https://github.com/vigetious/unrpyc/archive/master.zip", $"{configDirectory}/unrpyc", "unrpyc");
+                    Download("https://github.com/vigetious/unrpyc/archive/master.zip", $"{configDirectory}/unrpyc", "unrpyc");
                 }
                 Console.WriteLine("Downloaded unrpyc.");
                 Console.WriteLine("Dependencies installed/downloaded.");
@@ -94,7 +91,7 @@ namespace script_reader {
                 UnixCommand(@"C:\Windows\System32\cmd.exe",
                     $"/c \"{python3Location}\" -m venv config/venv", true);
                 Console.WriteLine("Virtual environment created. Installing/downloading dependencies...");
-                AddOrUpdateAppSetting("script-reader:python3VenvLocation", UnixCommand(@"C:\Windows\System32\cmd.exe",
+                AddOrUpdateAppSetting("renpy-tools:python3VenvLocation", UnixCommand(@"C:\Windows\System32\cmd.exe",
                     $"/c {configDirectory}/venv/Scripts/python -c \"import sys; print(sys.executable)\"", true).Trim());
                 UnixCommand(@"C:\Windows\System32\cmd.exe",
                     $"/c {configDirectory}/venv/Scripts/python -m pip install unrpa", true);
@@ -152,7 +149,7 @@ namespace script_reader {
             return path;
         }
 
-        private static void DownloadWithProgressBar(string repo, string destination, string name = null) {
+        private static void Download(string repo, string destination, string name = null) {
             Console.WriteLine(name != null ? $"Downloading {name}..." : "Downloading file...");
             if (NetworkInterface.GetIsNetworkAvailable()) {
                 HttpClient client = new HttpClient();

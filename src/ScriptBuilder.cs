@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace script_reader {
+namespace renpy_tools {
     public class ScriptBuilder {
         public int totalNumberOfWords { get; set; }
         public List<string> script { get; set; }
@@ -12,8 +12,8 @@ namespace script_reader {
             for (int i = 0; i < files.Length; i++) {
                 using (StreamReader sr = files[i].OpenText()) {
                     var buildScript = BuildScript(sr, characters);
-                    foreach (var VARIABLE in buildScript) {
-                        script.Add(VARIABLE);
+                    foreach (var line in buildScript) {
+                        script.Add(line);
                     }
                 }
             }
@@ -38,11 +38,9 @@ namespace script_reader {
                 if (!string.IsNullOrEmpty(potentialCharacter)) {
                     if (s.Trim().StartsWith('"') && s.Trim().EndsWith('"')) {
                         if (s.Trim().Contains(' ')) {
-                            //numberOfWords += s.Trim().Split(" ").Length;
                             script.Add(s.Trim());
                         }
                     } else if (s.Trim().EndsWith('"') && characters.Contains(potentialCharacter)) {
-                        //numberOfWords += s.Trim().Split('"')[1].Split(" ").Length;
                         script.Add(s.Trim().Split('"')[1]);
                     }
                 }

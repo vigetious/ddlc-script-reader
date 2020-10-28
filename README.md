@@ -1,8 +1,10 @@
-# DDLC Script Reader
+# Ren'Py Tools
 
-This application will tell you how many words are in your mod, and how long it will take to play (using a default WPM of 250).
+This application is still in its infancy, and as such only has limited functionality.
 
-It can also extract all of the script from a mod, exposing all spoken words by characters.
+At the moment, the application will tell you how many words are in your game, and how long it will take to play (using a default WPM of 250).
+
+It can also extract all of the script from a game, exposing all spoken words by characters.
 
 ### Config
 
@@ -39,6 +41,7 @@ The following are the optional commands.
 | ``-keepRPA``         | Keep extracted RPA files, instead of auto-deleting them after the operation runs. The files are kept in the created "extracted" directory.                    |
 | ``-keepScript``      | Keep extracted script, instead of auto-deleting them after the operation runs. The files are kept int he created "backup" directory.                          |
 | ``-json``            | Output in JSON format. Useful if tunneling output into another program.                                                                                       |
+| ``-update``          | Check for application updates.                                                                                                                                |
 
 ### Example Usage
 

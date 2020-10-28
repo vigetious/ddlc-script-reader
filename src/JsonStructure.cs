@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace script_reader {
+namespace renpy_tools {
     public class Parent {
         public int TotalWords;
         public Time Time;

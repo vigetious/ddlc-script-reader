@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
-using SharpCompress.Common;
-using SharpCompress.Readers;
-using static script_reader.Extract;
+using static renpy_tools.Extract;
+using static renpy_tools.Update;
 
-namespace script_reader {
+namespace renpy_tools {
     class Program {
         static void Main(string[] args) {
             var arguments = ParseCommandArguments(args);
+            if (arguments.Item2.Contains("-update")) {
+                CheckForUpdates();
+            }
             int wpm = 250;
             if (arguments.Item1.ContainsKey("-wpm")) {
                 wpm = int.Parse(arguments.Item1["-wpm"]);
@@ -90,26 +92,6 @@ namespace script_reader {
             if ((attr & FileAttributes.Directory) != FileAttributes.Directory) {
                 ExtractCompressedFile(directory, Directory.GetCurrentDirectory() + "/zippedFolder");
                 directory = Directory.GetCurrentDirectory() + "/zippedFolder";
-                /*try {
-                    using (Stream stream = File.OpenRead(directory))
-                    using (var reader = ReaderFactory.Open(stream)) {
-                        while (reader.MoveToNextEntry()) {
-                            if (!reader.Entry.IsDirectory) {
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
-                                Console.WriteLine("Extracted " + reader.Entry.Key);
-                                reader.WriteEntryToDirectory(Directory.GetCurrentDirectory() + "/zippedFolder",
-                                    new ExtractionOptions {
-                                        ExtractFullPath = true,
-                                        Overwrite = true
-                                    });
-                                directory = Directory.GetCurrentDirectory() + "/zippedFolder";
-                            }
-                        }
-                    }
-                } catch (InvalidOperationException) {
-                    Console.WriteLine("File is not a supported compressed file type. Currently supported file types: Zip, GZip, BZip2, Tar, Rar, LZip, XZ.");
-                    Environment.Exit(1);
-                }*/
             }
             try {
                 rpaFolder = new DirectoryInfo(directory).GetFiles("*.rpa", SearchOption.AllDirectories);

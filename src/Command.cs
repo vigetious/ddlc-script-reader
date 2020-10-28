@@ -2,9 +2,9 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using static script_reader.Config;
+using static renpy_tools.Config;
 
-namespace script_reader {
+namespace renpy_tools {
     public class Command {
         public static string UnixCommand(string exe, string args, bool ignore = false) {
             if (!ignore) {
@@ -37,11 +37,11 @@ namespace script_reader {
         private static string GetConfigValue(string exe) {
             switch (exe) {
                 case "python2":
-                    return GetAppSetting("script-reader:python2Location");
+                    return GetAppSetting("renpy-toolsrenpy-tools:python2Location");
                 case "python3":
-                    return GetAppSetting("script-reader:python3Location");
+                    return GetAppSetting("renpy-toolsrenpy-tools:python3Location");
                 case "python3Venv":
-                    return GetAppSetting("script-reader:python3VenvLocation");
+                    return GetAppSetting("renpy-toolsrenpy-tools:python3VenvLocation");
             }
             return exe;
         }
