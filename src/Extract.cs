@@ -49,8 +49,8 @@ namespace renpy_tools {
                 using (var reader = ReaderFactory.Open(stream)) {
                     while (reader.MoveToNextEntry()) {
                         if (!reader.Entry.IsDirectory) {
-                            Console.SetCursorPosition(0, Console.CursorTop - 1);
                             Console.WriteLine("Extracted " + reader.Entry.Key);
+                            Console.SetCursorPosition(0, Console.CursorTop - 1);
                             reader.WriteEntryToDirectory(extractedDirectory,
                                 new ExtractionOptions {
                                     ExtractFullPath = true,
@@ -58,6 +58,7 @@ namespace renpy_tools {
                                 });
                         }
                     }
+                    Console.WriteLine("Extracted file.");
                 }
             } catch (InvalidOperationException) {
                 Console.WriteLine(

@@ -37,11 +37,11 @@ namespace renpy_tools {
         private static string GetConfigValue(string exe) {
             switch (exe) {
                 case "python2":
-                    return GetAppSetting("renpy-toolsrenpy-tools:python2Location");
+                    return GetAppSetting("renpy-tools:python2Location");
                 case "python3":
-                    return GetAppSetting("renpy-toolsrenpy-tools:python3Location");
+                    return GetAppSetting("renpy-tools:python3Location");
                 case "python3Venv":
-                    return GetAppSetting("renpy-toolsrenpy-tools:python3VenvLocation");
+                    return GetAppSetting("renpy-tools:python3VenvLocation");
             }
             return exe;
         }

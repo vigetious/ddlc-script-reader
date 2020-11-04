@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using static renpy_tools.Extract;
 using static renpy_tools.Update;
@@ -8,6 +9,7 @@ using static renpy_tools.Update;
 namespace renpy_tools {
     class Program {
         static void Main(string[] args) {
+            Console.WriteLine(args[0]);
             var arguments = ParseCommandArguments(args);
             if (arguments.Item2.Contains("-update")) {
                 CheckForUpdates();
@@ -88,6 +90,9 @@ namespace renpy_tools {
 
         private static Extract ExtractFiles(string directory) {
             FileInfo[] rpaFolder;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                directory = directory.Replace("\"", "").Replace("'", "");
+            }
             FileAttributes attr = File.GetAttributes(directory);
             if ((attr & FileAttributes.Directory) != FileAttributes.Directory) {
                 ExtractCompressedFile(directory, Directory.GetCurrentDirectory() + "/zippedFolder");
@@ -158,10 +163,9 @@ namespace renpy_tools {
         private static Tuple<Dictionary<string, string>, List<string>> ParseCommandArguments(string[] args) {
             Dictionary<string, string> namedArguments = new Dictionary<string, string>();
             List<string> arguments = new List<string>();
-            string prefix = "-";
             if (args.Length != 0) {
                 for (var x = 0; x < args.Length; x++) {
-                    if (args[x].StartsWith(prefix) && args.Length > x + 1 && !args[x + 1].StartsWith("-")) {
+                    if (args[x].StartsWith("-") && args.Length > x + 1 && !args[x + 1].StartsWith("-")) {
                         namedArguments.Add(args[x], args[x + 1]);
                     } else {
                         arguments.Add(args[x]);

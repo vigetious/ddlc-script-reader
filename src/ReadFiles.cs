@@ -10,7 +10,7 @@ namespace renpy_tools {
             List<string> characters = new List<string>();
             for (int i = 0; i < files.Length; i++) {
                 if (files[i].Name == "definitions.rpy") {
-                    characters = getCharacters(files[i]);
+                    characters = GetCharacters(files[i]);
                     break;
                 }
             }
@@ -25,7 +25,7 @@ namespace renpy_tools {
             ScriptBuilder = new ScriptBuilder(files, characters, fi, commands);
         }
 
-        private static List<string> getCharacters(FileInfo definitions) {
+        private static List<string> GetCharacters(FileInfo definitions) {
             List<string> characters = new List<string>();
             using (StreamReader sr = definitions.OpenText()) {
                 string s = "";

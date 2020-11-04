@@ -51,24 +51,10 @@ namespace renpy_tools {
                 AddOrUpdateAppSetting("renpy-tools:python3VenvLocation", UnixCommand($"{configDirectory}/venv/bin/python",
                     "-c \"import sys; print(sys.executable)\"", true).Trim());
                 UnixCommand($"{configDirectory}/venv/bin/python", "-m pip install unrpa", true);
-
                 Console.WriteLine("Installed unrpa.");
-                /*try {
-                    Task.Run(() => {
-                        Repository.Clone("https://github.com/CensoredUsername/unrpyc.git",
-                            $"{configDirectory}/unrpyc", new CloneOptions {OnTransferProgress = ReportProgress});
-                    }).Wait();
-                } catch (AggregateException e) {
-                    Console.WriteLine(e);
-                    ManualInstallCheck($"{configDirectory}/unrpyc");
-                    Console.WriteLine("unrpyc already exists.");
-                }*/
                 if (!Directory.Exists($"{configDirectory}/unrpyc")) {
                     Download("https://github.com/vigetious/unrpyc/archive/master.zip", $"{configDirectory}/unrpyc", "unrpyc");
                 }
-                Console.WriteLine("Downloaded unrpyc.");
-                Console.WriteLine("Dependencies installed/downloaded.");
-                Console.WriteLine("Initialization finished. Now re-run the program with an RPA file.");
             } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                 if (UnixCommand(@"C:\Windows\System32\cmd.exe",
                     "/c py -2 -c \"import sys; print(sys.version_info.major)\"", true).StartsWith("2")) {
@@ -96,24 +82,17 @@ namespace renpy_tools {
                 UnixCommand(@"C:\Windows\System32\cmd.exe",
                     $"/c {configDirectory}/venv/Scripts/python -m pip install unrpa", true);
                 Console.WriteLine("Installed unrpa.");
-                Console.WriteLine("Downloading unrpyc...");
-                /*try {
-                    Task.Run(() => {
-                        Repository.Clone("https://github.com/CensoredUsername/unrpyc.git",
-                            $"{configDirectory}/unrpyc", new CloneOptions {OnTransferProgress = ReportProgress});
-                    }).Wait();
-                } catch (AggregateException e) {
-                    ManualInstallCheck($"{configDirectory}/unrpyc");
-                    Console.WriteLine("unrpyc already exists.");
-                }*/
-                Console.WriteLine("Downloaded unrpyc.");
-                Console.WriteLine("Dependencies installed/downloaded.");
-                Console.WriteLine("Initialization finished. Now re-run the program with an RPA file.");
+                if (!Directory.Exists($"{configDirectory}/unrpyc")) {
+                    Download("https://github.com/vigetious/unrpyc/archive/master.zip", $"{configDirectory}/unrpyc", "unrpyc");
+                }
             } else {
                 Console.WriteLine(
                     "Platform not recognised. Please leave an issue in the Github repo to report your OS as missing support.");
                 Environment.Exit(1);
             }
+            Console.WriteLine("Downloaded unrpyc.");
+            Console.WriteLine("Dependencies installed/downloaded.");
+            Console.WriteLine("Initialization finished. Moving the program file will require running `init` again. Now re-run the program with an RPA file.");
 
             return new Tuple<string, string>(python2Location, python3Location);
         }
