@@ -6,9 +6,6 @@ At the moment, the application will tell you how many words are in your game, an
 
 It can also extract all of the script from a game, exposing all spoken words by characters.
 
-### Config
-
-Most users will not need to change the configuration of the 
 
 ### Usage
 
