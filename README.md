@@ -6,6 +6,11 @@ At the moment, the application will tell you how many words are in your game, an
 
 It can also extract all of the script from a game, exposing all spoken words by characters.
 
+### Setup
+
+Download the program and move it to an appropriate directory.
+
+If you are on a Unix-based system, don't forget to ``chmod +x ./renpy-tools`` to make it an executable.
 
 ### Usage
 
