@@ -61,3 +61,13 @@ The following are the optional commands.
 
 - Python 2
 - Python 3
+
+### Thanks
+
+Thanks to the developers of:
+
+[unrpyc](https://github.com/CensoredUsername/unrpyc)
+
+[unrpa](https://github.com/Lattyware/unrpa)
+
+This program would not be possible without their contributions to the community.
