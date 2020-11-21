@@ -9,7 +9,6 @@ using static renpy_tools.Update;
 namespace renpy_tools {
     class Program {
         static void Main(string[] args) {
-            Console.WriteLine(args[0]);
             var arguments = ParseCommandArguments(args);
             if (arguments.Item2.Contains("-update")) {
                 CheckForUpdates();
@@ -138,7 +137,7 @@ namespace renpy_tools {
                 Console.WriteLine("Understood, removing all files/folders...");
                 if (Directory.Exists(Directory.GetCurrentDirectory() + "/extracted")) {
                     Directory.Delete(Directory.GetCurrentDirectory() + "/extracted", true);
-                } 
+                }
                 if (Directory.Exists(Directory.GetCurrentDirectory() + "/config")) {
                     Directory.Delete(Directory.GetCurrentDirectory() + "/config", true);
                 }

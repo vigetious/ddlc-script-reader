@@ -78,9 +78,9 @@ namespace renpy_tools {
                     $"/c \"{python3Location}\" -m venv config/venv", true);
                 Console.WriteLine("Virtual environment created. Installing/downloading dependencies...");
                 AddOrUpdateAppSetting("renpy-tools:python3VenvLocation", UnixCommand(@"C:\Windows\System32\cmd.exe",
-                    $"/c {configDirectory}/venv/Scripts/python -c \"import sys; print(sys.executable)\"", true).Trim());
+                    $"/c \"\"{configDirectory}/venv/Scripts/python\" -c \"import sys; print(sys.executable)\"", true).Trim());
                 UnixCommand(@"C:\Windows\System32\cmd.exe",
-                    $"/c {configDirectory}/venv/Scripts/python -m pip install unrpa", true);
+                    $"/c \"\"{configDirectory}/venv/Scripts/python\" -m pip install unrpa\"", true);
                 Console.WriteLine("Installed unrpa.");
                 if (!Directory.Exists($"{configDirectory}/unrpyc")) {
                     Download("https://github.com/vigetious/unrpyc/archive/master.zip", $"{configDirectory}/unrpyc", "unrpyc");
