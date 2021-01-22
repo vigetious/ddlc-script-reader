@@ -47,15 +47,15 @@ The following are the optional commands.
 
 ### Example Usage
 
-``./script-reader /myDDLCMod``
+``./script-reader /game``
 
-``./script-reader /myDDLCModZip.zip``
+``./script-reader /game.zip``
 
-``./script-reader -wpm 150 -dir /myDDLCMod``
+``./script-reader -wpm 150 -dir /game``
 
 ``./script-reader -rm soft``
 
-``./script-reader /myDDLCMod -keepScript -json``
+``./script-reader /game -keepScript -json``
 
 ### Dependencies
 
